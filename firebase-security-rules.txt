@@ -1,0 +1,23 @@
+// FIRESTORE RULES
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /capsules/{capsuleId} {
+      // Allow read/write only if the user is authenticated and is the owner
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Allow create only if authenticated and setting themselves as the owner
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+  }
+}
+
+// STORAGE RULES
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /capsules/{userId}/{fileName} {
+      // Allow read/write only if authenticated and accessing their own folder
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
