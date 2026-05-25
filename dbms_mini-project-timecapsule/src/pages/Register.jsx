@@ -1,96 +1,107 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { useState } from "react";
 
-const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
+import { useNavigate, Link } from "react-router-dom";
+
+function Register() {
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
+
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      return toast.error("Passwords do not match");
-    }
 
     try {
-      setLoading(true);
-      await signup(email, password);
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+
+      const response = await fetch(
+        "http://localhost:5000/register",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      alert(data.message);
+
+      navigate("/login");
+
     } catch (error) {
-      toast.error(error.message || 'Failed to create an account');
-    } finally {
-      setLoading(false);
+
+      console.log(error);
+
+      alert("Server Error");
     }
   };
 
   return (
-    <div className="min-h-screen pt-16 flex items-center justify-center px-4 relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md glass-card p-8"
-      >
-        <h2 className="text-3xl font-bold text-center mb-8">Create Vault</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-            <input 
-              type="email" 
-              required 
-              className="glass-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-            <input 
-              type="password" 
-              required 
-              className="glass-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-            <input 
-              type="password" 
-              required 
-              className="glass-input"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full btn-primary mt-6"
+    <div className="min-h-screen bg-black flex justify-center items-center">
+
+      <form
+        onSubmit={handleRegister}
+        className="bg-zinc-900 p-10 rounded-3xl w-96"
+      >
+
+        <h1 className="text-4xl text-white font-bold mb-8">
+          Register
+        </h1>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+          className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+          className="w-full p-4 mb-6 rounded-xl bg-zinc-800 text-white"
+        />
+
+        <button
+          className="w-full bg-purple-600 p-4 rounded-xl text-white font-bold"
+        >
+          Register
+        </button>
+
+        <p className="text-zinc-400 mt-6">
+
+          Already have account?{" "}
+
+          <Link
+            to="/login"
+            className="text-purple-400"
           >
-            {loading ? 'Creating...' : 'Initialize Vault'}
-          </button>
-        </form>
-        
-        <div className="mt-6 text-center text-sm text-gray-400">
-          Already have an account? <Link to="/login" className="text-vault-neon hover:underline">Login</Link>
-        </div>
-      </motion.div>
+            Login
+          </Link>
+
+        </p>
+
+      </form>
+
     </div>
   );
-};
+}
 
 export default Register;

@@ -1,79 +1,117 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { useState } from "react";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+import { useNavigate, Link } from "react-router-dom";
+
+function Login() {
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
+
     e.preventDefault();
+
     try {
-      setLoading(true);
-      await login(email, password);
-      toast.success('Successfully logged in!');
-      navigate('/dashboard');
+
+      const response = await fetch(
+        "http://localhost:5000/login",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
+        navigate("/dashboard");
+
+      } else {
+
+        alert("Invalid Credentials");
+      }
+
     } catch (error) {
-      toast.error(error.message || 'Failed to login');
-    } finally {
-      setLoading(false);
+
+      console.log(error);
+
+      alert("Server Error");
     }
   };
 
   return (
-    <div className="min-h-screen pt-16 flex items-center justify-center px-4 relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-vault-accent/10 rounded-full blur-[120px] -z-10" />
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md glass-card p-8"
+
+    <div className="min-h-screen bg-black flex justify-center items-center">
+
+      <form
+        onSubmit={handleLogin}
+        className="bg-zinc-900 p-10 rounded-3xl w-96"
       >
-        <h2 className="text-3xl font-bold text-center mb-8">Access Vault</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-            <input 
-              type="email" 
-              required 
-              className="glass-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-            <input 
-              type="password" 
-              required 
-              className="glass-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full btn-primary mt-4"
+
+        <h1 className="text-4xl text-white font-bold mb-8">
+          Login
+        </h1>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+          className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+          className="w-full p-4 mb-6 rounded-xl bg-zinc-800 text-white"
+        />
+
+        <button
+          className="w-full bg-purple-600 p-4 rounded-xl text-white font-bold"
+        >
+          Login
+        </button>
+
+        <p className="text-zinc-400 mt-6">
+
+          Don’t have account?{" "}
+
+          <Link
+            to="/register"
+            className="text-purple-400"
           >
-            {loading ? 'Authenticating...' : 'Enter Vault'}
-          </button>
-        </form>
-        
-        <div className="mt-6 text-center text-sm text-gray-400">
-          Don't have an account? <Link to="/register" className="text-vault-neon hover:underline">Create one</Link>
-        </div>
-      </motion.div>
+            Register
+          </Link>
+
+        </p>
+
+      </form>
+
     </div>
   );
-};
+}
 
 export default Login;

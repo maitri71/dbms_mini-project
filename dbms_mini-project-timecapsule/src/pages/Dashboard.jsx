@@ -1,94 +1,220 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../firebase/config';
-import { useAuth } from '../context/AuthContext';
-import CapsuleCard from '../components/ui/CapsuleCard';
-import CapsuleModal from '../components/ui/CapsuleModal';
-import { FaPlus } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
+import { useEffect, useState } from "react";
 
-const Dashboard = () => {
+import { Link, useNavigate } from "react-router-dom";
+
+function Dashboard() {
+
   const [capsules, setCapsules] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCapsule, setSelectedCapsule] = useState(null);
-  const { currentUser } = useAuth();
+
+  const navigate = useNavigate();
+
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
 
   useEffect(() => {
-    const fetchCapsules = async () => {
-      try {
-        const q = query(
-          collection(db, 'capsules'),
-          where('userId', '==', currentUser.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const querySnapshot = await getDocs(q);
-        const fetchedCapsules = [];
-        querySnapshot.forEach((doc) => {
-          fetchedCapsules.push({ id: doc.id, ...doc.data() });
-        });
-        setCapsules(fetchedCapsules);
-      } catch (error) {
-        console.error("Error fetching capsules:", error);
-        toast.error("Failed to load your capsules.");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    if (currentUser) {
-      fetchCapsules();
+    if (!user) {
+
+      navigate("/login");
+
+      return;
     }
-  }, [currentUser]);
 
-  const handleOpenCapsule = (capsule) => {
-    setSelectedCapsule(capsule);
+    fetchCapsules();
+
+  }, []);
+
+  const fetchCapsules = async () => {
+
+    try {
+
+      const response = await fetch(
+        `http://localhost:5000/capsules/${user.id}`
+      );
+
+      const data = await response.json();
+
+      setCapsules(data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
   };
 
+  const handleLogout = () => {
+
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
+
+  const unlockedCapsules = capsules.filter(
+    (capsule) =>
+      new Date(capsule.unlock_date) <= new Date()
+  );
+
+  const lockedCapsules = capsules.filter(
+    (capsule) =>
+      new Date(capsule.unlock_date) > new Date()
+  );
+
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Your Vault</h1>
-        <Link to="/create" className="btn-primary flex items-center gap-2">
-          <FaPlus /> New Capsule
-        </Link>
+
+    <div className="min-h-screen bg-black text-white p-8">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-10">
+
+        <div>
+
+          <h1 className="text-5xl font-bold">
+            My Vaults
+          </h1>
+
+          <p className="text-zinc-400 mt-2">
+            Welcome back ✨
+          </p>
+
+        </div>
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 px-5 py-3 rounded-xl"
+        >
+          Logout
+        </button>
+
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-vault-accent"></div>
-        </div>
-      ) : capsules.length === 0 ? (
-        <div className="glass-card p-12 text-center flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-vault-border flex items-center justify-center mb-6">
-            <FaPlus className="text-3xl text-gray-400" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Vault is Empty</h2>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            You haven't created any memory capsules yet. Start preserving your memories today.
-          </p>
-          <Link to="/create" className="btn-primary">Create Your First Capsule</Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {capsules.map(capsule => (
-            <CapsuleCard 
-              key={capsule.id} 
-              capsule={capsule} 
-              onClick={handleOpenCapsule} 
-            />
-          ))}
-        </div>
-      )}
+      {/* STATS */}
+      <div className="grid md:grid-cols-3 gap-6 mb-10">
 
-      {selectedCapsule && (
-        <CapsuleModal 
-          capsule={selectedCapsule} 
-          onClose={() => setSelectedCapsule(null)} 
-        />
-      )}
+        <div className="bg-zinc-900 p-6 rounded-2xl">
+
+          <h2 className="text-zinc-400">
+            Total Vaults
+          </h2>
+
+          <p className="text-4xl font-bold mt-2">
+            {capsules.length}
+          </p>
+
+        </div>
+
+        <div className="bg-zinc-900 p-6 rounded-2xl">
+
+          <h2 className="text-zinc-400">
+            Locked
+          </h2>
+
+          <p className="text-4xl font-bold mt-2 text-red-400">
+            {lockedCapsules.length}
+          </p>
+
+        </div>
+
+        <div className="bg-zinc-900 p-6 rounded-2xl">
+
+          <h2 className="text-zinc-400">
+            Unlocked
+          </h2>
+
+          <p className="text-4xl font-bold mt-2 text-green-400">
+            {unlockedCapsules.length}
+          </p>
+
+        </div>
+
+      </div>
+
+      {/* CREATE BUTTON */}
+      <Link
+        to="/create-capsule"
+        className="bg-purple-600 px-6 py-4 rounded-2xl inline-block mb-10"
+      >
+        + Create Vault
+      </Link>
+
+      {/* CAPSULES */}
+      <div className="grid md:grid-cols-3 gap-8">
+
+        {capsules.map((capsule) => {
+
+          const isUnlocked =
+            new Date(capsule.unlock_date)
+            <=
+            new Date();
+
+          return (
+
+            <div
+              key={capsule.id}
+              className="bg-zinc-900 rounded-3xl overflow-hidden"
+            >
+
+              <img
+                src={
+                  capsule.image_url ||
+                  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac"
+                }
+                alt=""
+                className={`w-full h-56 object-cover ${
+                  !isUnlocked
+                    ? "blur-md"
+                    : ""
+                }`}
+              />
+
+              <div className="p-6">
+
+                <h2 className="text-2xl font-bold mb-3">
+                  {capsule.title}
+                </h2>
+
+                <p className="text-zinc-400 mb-4">
+
+                  {isUnlocked
+                    ? capsule.message
+                    : "This vault is locked 🔒"}
+
+                </p>
+
+                <p className="text-purple-400 mb-4">
+
+                  Unlock:
+                  {" "}
+                  {new Date(
+                    capsule.unlock_date
+                  ).toLocaleString()}
+
+                </p>
+
+                <div
+                  className={`font-bold ${
+                    isUnlocked
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+
+                  {isUnlocked
+                    ? "Unlocked"
+                    : "Locked"}
+
+                </div>
+
+              </div>
+
+            </div>
+          );
+        })}
+
+      </div>
+
     </div>
   );
-};
+}
 
 export default Dashboard;
