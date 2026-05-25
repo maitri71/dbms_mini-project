@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 
 import CreateCapsule from "./pages/CreateCapsule";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
 
   return (
@@ -33,14 +35,28 @@ function App() {
           element={<Register />}
         />
 
+        {/* PROTECTED DASHBOARD */}
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute>
+
+              <Dashboard />
+
+            </ProtectedRoute>
+          }
         />
 
+        {/* PROTECTED CREATE */}
         <Route
           path="/create-capsule"
-          element={<CreateCapsule />}
+          element={
+            <ProtectedRoute>
+
+              <CreateCapsule />
+
+            </ProtectedRoute>
+          }
         />
 
       </Routes>

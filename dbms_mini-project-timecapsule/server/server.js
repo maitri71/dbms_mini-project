@@ -72,6 +72,8 @@ app.post("/login", (req, res) => {
 // CREATE CAPSULE API
 app.post("/create-capsule", (req, res) => {
 
+  console.log(req.body);
+
   const {
     user_id,
     title,
@@ -99,12 +101,14 @@ app.post("/create-capsule", (req, res) => {
 
       if (err) {
 
+        console.log(err);
+
         res.status(500).json(err);
 
       } else {
 
         res.json({
-          message: "Capsule Created"
+          message: "Capsule Created Successfully"
         });
       }
     }

@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
+import Navbar from "../components/Navbar";
+
 function CreateCapsule() {
 
   const [title, setTitle] = useState("");
@@ -64,68 +66,72 @@ function CreateCapsule() {
 
   return (
 
-    <div className="min-h-screen bg-black flex justify-center items-center">
+    <>
+      <Navbar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-zinc-900 p-10 rounded-3xl w-[500px]"
-      >
+      <div className="min-h-screen bg-black flex justify-center items-center px-6 py-12">
 
-        <h1 className="text-4xl text-white font-bold mb-8">
-          Create Vault
-        </h1>
-
-        {/* Title */}
-        <input
-          type="text"
-          placeholder="Vault Title"
-          value={title}
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
-          className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
-        />
-
-        {/* Message */}
-        <textarea
-          placeholder="Write your future message..."
-          value={message}
-          onChange={(e) =>
-            setMessage(e.target.value)
-          }
-          className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white h-40"
-        />
-
-        {/* Image URL */}
-        <input
-          type="text"
-          placeholder="Image URL"
-          value={imageUrl}
-          onChange={(e) =>
-            setImageUrl(e.target.value)
-          }
-          className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
-        />
-
-        {/* Unlock Date */}
-        <input
-          type="datetime-local"
-          value={unlockDate}
-          onChange={(e) =>
-            setUnlockDate(e.target.value)
-          }
-          className="w-full p-4 mb-6 rounded-xl bg-zinc-800 text-white"
-        />
-
-        <button
-          className="w-full bg-purple-600 p-4 rounded-xl text-white font-bold"
+        <form
+          onSubmit={handleSubmit}
+          className="bg-zinc-900 border border-zinc-800 p-10 rounded-3xl w-full max-w-2xl"
         >
-          Create Capsule
-        </button>
 
-      </form>
+          <h1 className="text-5xl text-white font-bold mb-3">
+            Create Vault
+          </h1>
 
-    </div>
+          <p className="text-zinc-400 mb-8">
+            Store memories for your future self ✨
+          </p>
+
+          <input
+            type="text"
+            placeholder="Vault Title"
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+            className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
+          />
+
+          <textarea
+            placeholder="Write your future message..."
+            value={message}
+            onChange={(e) =>
+              setMessage(e.target.value)
+            }
+            className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white h-40"
+          />
+
+          <input
+            type="text"
+            placeholder="Image URL"
+            value={imageUrl}
+            onChange={(e) =>
+              setImageUrl(e.target.value)
+            }
+            className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
+          />
+
+          <input
+            type="datetime-local"
+            value={unlockDate}
+            onChange={(e) =>
+              setUnlockDate(e.target.value)
+            }
+            className="w-full p-4 mb-6 rounded-xl bg-zinc-800 text-white"
+          />
+
+          <button
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-white font-bold hover:scale-[1.02] transition"
+          >
+            Create Capsule
+          </button>
+
+        </form>
+
+      </div>
+    </>
   );
 }
 
