@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
-
+import LiveClock from "../components/LiveClock";
 import { Link, useNavigate } from "react-router-dom";
-
+import ParticlesBackground from "../components/ParticlesBackground";
 import Navbar from "../components/Navbar";
+
+import confetti from "canvas-confetti";
+
+import Countdown from "react-countdown";
+
+import { motion } from "framer-motion";
 
 function Dashboard() {
 
@@ -38,6 +44,15 @@ function Dashboard() {
     setCapsules(data);
   };
 
+  const triggerConfetti = () => {
+
+    confetti({
+      particleCount: 150,
+      spread: 100,
+      origin: { y: 0.6 }
+    });
+  };
+
   const lockedCapsules = capsules.filter(
     c => new Date(c.unlock_date) > new Date()
   );
@@ -49,89 +64,105 @@ function Dashboard() {
   return (
 
     <>
+      <ParticlesBackground />
       <Navbar />
+      <LiveClock />
 
-      <div className="min-h-screen bg-black text-white p-8">
+      <div className="min-h-screen bg-black text-white p-8 relative overflow-hidden">
 
-        <div className="mb-10">
+        {/* Background Glow */}
+        <div className="absolute top-10 left-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
 
-          <h1 className="text-5xl font-bold">
-            My Vaults
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-600/20 rounded-full blur-[120px]" />
+
+        {/* Header */}
+        <div className="relative z-10 mb-12">
+
+          <h1 className="text-6xl font-extrabold mb-3">
+
+            Welcome Back ✨
+
           </h1>
 
-          <p className="text-zinc-400 mt-3">
-            Preserve memories for your future self ✨
+          <p className="text-zinc-400 text-lg">
+
+            Preserve your future memories inside digital vaults.
+
           </p>
 
         </div>
 
         {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-10">
+        <div className="grid md:grid-cols-3 gap-6 mb-12 relative z-10">
 
-          <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
+          {[
 
-            <p className="text-zinc-400">
-              Total Vaults
-            </p>
+            {
+              title: "Total Vaults",
+              value: capsules.length,
+              color: "from-purple-600 to-pink-600"
+            },
 
-            <h2 className="text-5xl font-bold mt-3">
-              {capsules.length}
-            </h2>
+            {
+              title: "Locked",
+              value: lockedCapsules.length,
+              color: "from-red-500 to-orange-500"
+            },
 
-          </div>
+            {
+              title: "Unlocked",
+              value: unlockedCapsules.length,
+              color: "from-green-500 to-emerald-500"
+            }
 
-          <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
+          ].map((card, index) => (
 
-            <p className="text-zinc-400">
-              Locked Vaults
-            </p>
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.04 }}
+              className={`bg-gradient-to-br ${card.color} p-8 rounded-3xl shadow-2xl`}
+            >
 
-            <h2 className="text-5xl font-bold mt-3 text-red-400">
-              {lockedCapsules.length}
-            </h2>
+              <p className="text-white/80 text-lg">
+                {card.title}
+              </p>
 
-          </div>
+              <h2 className="text-6xl font-extrabold mt-4">
+                {card.value}
+              </h2>
 
-          <div className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800">
+            </motion.div>
 
-            <p className="text-zinc-400">
-              Unlocked Vaults
-            </p>
-
-            <h2 className="text-5xl font-bold mt-3 text-green-400">
-              {unlockedCapsules.length}
-            </h2>
-
-          </div>
+          ))}
 
         </div>
 
-        {/* Button */}
+        {/* Create Button */}
         <Link
           to="/create-capsule"
-          className="inline-block mb-10 bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 rounded-2xl font-bold"
+          className="inline-block mb-12 bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-2xl text-lg font-bold hover:scale-105 transition relative z-10"
         >
-          + Create Vault
+          + Create New Vault
         </Link>
 
         {/* Empty State */}
         {capsules.length === 0 ? (
 
-          <div className="text-center mt-20">
+          <div className="text-center mt-20 relative z-10">
 
-            <h2 className="text-4xl font-bold">
+            <h2 className="text-5xl font-bold">
               No Vaults Yet
             </h2>
 
-            <p className="text-zinc-400 mt-4">
-              Create your first time capsule ✨
+            <p className="text-zinc-400 mt-5 text-lg">
+              Create your first futuristic memory capsule 🚀
             </p>
 
           </div>
 
         ) : (
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 relative z-10">
 
             {capsules.map((capsule) => {
 
@@ -142,31 +173,36 @@ function Dashboard() {
 
               return (
 
-                <div
+                <motion.div
+                  whileHover={{ y: -10 }}
                   key={capsule.id}
-                  className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden"
+                  className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
                 >
 
-                  <img
-                    src={
-                      capsule.image_url ||
-                      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac"
-                    }
-                    alt=""
-                    className={`w-full h-56 object-cover ${
-                      !isUnlocked
-                        ? "blur-md"
-                        : ""
-                    }`}
-                  />
+                  <div className="overflow-hidden">
+
+                    <img
+                      src={
+                        capsule.image_url ||
+                        "https://images.unsplash.com/photo-1529156069898-49953e39b3ac"
+                      }
+                      alt=""
+                      className={`w-full h-60 object-cover transition-all duration-700 ${
+                        !isUnlocked
+                          ? "blur-md scale-105"
+                          : "hover:scale-110"
+                      }`}
+                    />
+
+                  </div>
 
                   <div className="p-6">
 
-                    <h2 className="text-2xl font-bold mb-3">
+                    <h2 className="text-3xl font-bold mb-4">
                       {capsule.title}
                     </h2>
 
-                    <p className="text-zinc-400 mb-4">
+                    <p className="text-zinc-400 mb-5 leading-relaxed">
 
                       {isUnlocked
                         ? capsule.message
@@ -174,18 +210,57 @@ function Dashboard() {
 
                     </p>
 
-                    <p className="text-purple-400 mb-4">
+                    <div className="mb-5">
 
-                      Unlock:
-                      {" "}
-                      {new Date(
-                        capsule.unlock_date
-                      ).toLocaleString()}
+                      <p className="text-purple-400 font-semibold mb-2">
 
-                    </p>
+                        Unlock Date
 
+                      </p>
+
+                      <p className="text-zinc-300">
+
+                        {new Date(
+                          capsule.unlock_date
+                        ).toLocaleString()}
+
+                      </p>
+
+                    </div>
+
+                    {/* Countdown */}
+                    {!isUnlocked && (
+
+                      <div className="bg-black/40 p-4 rounded-2xl mb-5">
+
+                        <p className="text-zinc-400 mb-2">
+                          Unlocks In
+                        </p>
+
+                        <Countdown
+                          date={new Date(capsule.unlock_date)}
+                          className="text-2xl font-bold text-pink-400"
+                        />
+
+                      </div>
+
+                    )}
+
+                    {/* Open Button */}
+                    {isUnlocked && (
+
+                      <button
+                        onClick={triggerConfetti}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 py-4 rounded-2xl font-bold hover:scale-[1.02] transition"
+                      >
+                        Open Vault 🎉
+                      </button>
+
+                    )}
+
+                    {/* Status */}
                     <div
-                      className={`font-bold ${
+                      className={`mt-5 text-lg font-bold ${
                         isUnlocked
                           ? "text-green-400"
                           : "text-red-400"
@@ -200,7 +275,7 @@ function Dashboard() {
 
                   </div>
 
-                </div>
+                </motion.div>
               );
             })}
 

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { motion } from "framer-motion";
-
+import ParticlesBackground from "../components/ParticlesBackground";
 import { FaLock, FaClock, FaShieldAlt } from "react-icons/fa";
 
 import Navbar from "../components/Navbar";
@@ -11,6 +11,7 @@ function Home() {
   return (
 
     <>
+      <ParticlesBackground />
       <Navbar />
 
       <div className="min-h-screen bg-black text-white overflow-hidden relative">

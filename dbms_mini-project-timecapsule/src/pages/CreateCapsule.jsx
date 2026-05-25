@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 
+import ParticlesBackground from "../components/ParticlesBackground";
+
 function CreateCapsule() {
 
   const [title, setTitle] = useState("");
@@ -12,7 +14,7 @@ function CreateCapsule() {
 
   const [unlockDate, setUnlockDate] = useState("");
 
-  const [imageUrl, setImageUrl] = useState("");
+  const [image, setImage] = useState(null);
 
   const navigate = useNavigate();
 
@@ -26,27 +28,26 @@ function CreateCapsule() {
 
     try {
 
+      const formData = new FormData();
+
+      formData.append("user_id", user.id);
+
+      formData.append("title", title);
+
+      formData.append("message", message);
+
+      formData.append(
+        "unlock_date",
+        unlockDate
+      );
+
+      formData.append("image", image);
+
       const response = await fetch(
         "http://localhost:5000/create-capsule",
         {
           method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-
-            user_id: user.id,
-
-            title,
-
-            message,
-
-            image_url: imageUrl,
-
-            unlock_date: unlockDate,
-          }),
+          body: formData,
         }
       );
 
@@ -69,11 +70,13 @@ function CreateCapsule() {
     <>
       <Navbar />
 
-      <div className="min-h-screen bg-black flex justify-center items-center px-6 py-12">
+      <ParticlesBackground />
+
+      <div className="min-h-screen bg-black flex justify-center items-center px-6 py-12 relative">
 
         <form
           onSubmit={handleSubmit}
-          className="bg-zinc-900 border border-zinc-800 p-10 rounded-3xl w-full max-w-2xl"
+          className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 p-10 rounded-3xl w-full max-w-2xl relative z-10"
         >
 
           <h1 className="text-5xl text-white font-bold mb-3">
@@ -104,11 +107,9 @@ function CreateCapsule() {
           />
 
           <input
-            type="text"
-            placeholder="Image URL"
-            value={imageUrl}
+            type="file"
             onChange={(e) =>
-              setImageUrl(e.target.value)
+              setImage(e.target.files[0])
             }
             className="w-full p-4 mb-4 rounded-xl bg-zinc-800 text-white"
           />
@@ -123,7 +124,7 @@ function CreateCapsule() {
           />
 
           <button
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-white font-bold hover:scale-[1.02] transition"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-white font-bold"
           >
             Create Capsule
           </button>
